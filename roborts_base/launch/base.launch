@@ -1,0 +1,8 @@
+<launch>
+  <master auto="start"/>
+  <!-- Load the Base Parameter -->
+  <rosparam command="load" file="$(find roborts_base)/config/base.yaml" />
+  <!-- Run the Base Node -->
+  <node pkg="roborts_base" type="roborts_base_node" name="roborts_base_node" output="screen" respawn="true" />
+
+</launch>

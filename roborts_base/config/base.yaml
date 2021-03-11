@@ -1,0 +1,2 @@
+serial_port : "/dev/serial_sdk"
+load_module : [ "chassis", "gimbal", "referee_system" ]
