@@ -57,15 +57,6 @@ class Gimbal: public Module {
    * @param msg Gimbal angle control data
    */
   void GimbalAngleCtrlCallback(const roborts_msgs::GimbalAngle::ConstPtr &msg);
-
-  /**
-   * @brief Gimbal mode set service callback in ROS
-   * @param req Gimbal mode set as request
-   * @param res Mode set result as response
-   * @return True if success
-   */
-  bool SetGimbalModeService(roborts_msgs::GimbalMode::Request &req,
-                            roborts_msgs::GimbalMode::Response &res);
   /**
    * @brief Control friction wheel service callback in ROS
    * @param req Friction wheel control data as request
@@ -95,8 +86,6 @@ class Gimbal: public Module {
 
   //! sdk publisher for gimbal angle control
   std::shared_ptr<roborts_sdk::Publisher<roborts_sdk::cmd_gimbal_angle>>     gimbal_angle_pub_;
-  //! sdk publisher for gimbal mode set
-  std::shared_ptr<roborts_sdk::Publisher<roborts_sdk::gimbal_mode_e>>        gimbal_mode_pub_;
   //! sdk publisher for frcition wheel control
   std::shared_ptr<roborts_sdk::Publisher<roborts_sdk::cmd_fric_wheel_speed>> fric_wheel_pub_;
   //! sdk publisher for gimbal shoot control
@@ -106,8 +95,6 @@ class Gimbal: public Module {
   ros::NodeHandle    ros_nh_;
   //! ros subscriber for gimbal angle control
   ros::Subscriber    ros_sub_cmd_gimbal_angle_;
-  //! ros service server for gimbal mode set
-  ros::ServiceServer ros_gimbal_mode_srv_;
   //! ros service server for friction wheel control
   ros::ServiceServer ros_ctrl_fric_wheel_srv_;
   //! ros service server for gimbal shoot control

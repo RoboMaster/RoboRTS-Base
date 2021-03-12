@@ -51,14 +51,18 @@
   
  
 ### Services
-
-- set_gimbal_mode ([roborts_msgs/GimbalMode](../roborts_msgs/srv/gimbal/GimbalMode.srv))
-
-  Set the mode of the gimbal, where 0 represents CODE_CONTROL and 1 represents GYRO_CONTROL.
   
 - cmd_fric_wheel ([roborts_msgs/FricWhl](../roborts_msgs/srv/gimbal/FricWhl.srv))
 
-  Start and stop the friction wheel.
+  Start and stop the friction wheel. 
+  
+  If you want to change the shoot speed(friction wheel motor speed), please change the value of `fric_speed` (normally from 1200 to 1500) in the [gimbal.cpp](../roborts_base/src/gimbal.cpp) and rebuild the package.
+  
+  ```cpp
+      fric_speed.left = 1240;
+      fric_speed.right = 1240;
+  ```
+  The default value is 1240 and shoot speed is about 8 m/s.
   
 - cmd_shoot ([roborts_msgs/ShootCmd](../roborts_msgs/srv/gimbal/ShootCmd.srv))
 

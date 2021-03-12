@@ -43,7 +43,6 @@ add_message_files(
 add_service_files(
         DIRECTORY srv/gimbal
         FILES
-        GimbalMode.srv
         FricWhl.srv
         ShootCmd.srv
 )

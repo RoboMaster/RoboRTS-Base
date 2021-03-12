@@ -31,7 +31,6 @@
 
 //! Gimbal
 #include "roborts_msgs/GimbalAngle.h"
-#include "roborts_msgs/GimbalMode.h"
 #include "roborts_msgs/ShootCmd.h"
 #include "roborts_msgs/FricWhl.h"
 
