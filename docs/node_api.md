@@ -115,6 +115,15 @@
     |  4     | Blue Bullet Supply  | 
     |  5     | Disable Shooting    | 
     |  6     | Disable Movement    |   
+- lurk_status([roborts_msgs/LurkStatus](../roborts_msgs/msg/referee_system/LurkStatus.msg))
+
+  Indicates whether the current game is in lurking mode.
+
+    | Status | Description         | 
+    | ------ | :---------------:   | 
+    |  0     | normal		   | 
+    |  1     | ready to lurk	   | 
+    |  2     | lurking		   | 
 
 - robot_damage ([roborts_msgs/RobotDamage](../roborts_msgs/msg/referee_system/RobotDamage.msg))
 
