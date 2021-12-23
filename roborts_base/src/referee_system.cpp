@@ -77,6 +77,7 @@ void RefereeSystem::ROS_Init() {
   ros_game_robot_hp_pub_ = ros_nh_.advertise<roborts_msgs::GameRobotHP>("game_robot_hp", 30);
   ros_game_robot_bullet_pub_ = ros_nh_.advertise<roborts_msgs::GameRobotBullet>("game_robot_bullet", 30);
   ros_game_zone_array_pub_ = ros_nh_.advertise<roborts_msgs::GameZoneArray>("game_zone_array_status", 30);
+  ros_game_lurk_status_pub_=ros_nh_.advertise<roborts_msgs::LurkStatus>("game_lurk_status",30);
   /** Robot Related **/
   ros_robot_status_pub_ = ros_nh_.advertise<roborts_msgs::RobotStatus>("robot_status", 30);
   ros_robot_heat_pub_ = ros_nh_.advertise<roborts_msgs::RobotHeat>("robot_heat", 30);
@@ -130,6 +131,10 @@ void RefereeSystem::GameEventCallback(const std::shared_ptr<roborts_sdk::cmd_gam
   game_zone_array.zone[5].active = bool(raw_game_event->F6_zone_status);
   
   ros_game_zone_array_pub_.publish(game_zone_array);
+
+roborts_msgs::LurkStatus game_lurk_status;
+game_lurk_status.lurk_mode = raw_game_event->lurk_mode;
+ros_game_lurk_status_pub_.publish(game_lurk_status);
 
 }
 
