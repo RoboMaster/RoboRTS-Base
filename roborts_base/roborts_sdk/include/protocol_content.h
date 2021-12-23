@@ -374,6 +374,10 @@ typedef struct
   uint16_t red2_bullet_left;
   uint16_t blue1_bullet_left;
   uint16_t blue2_bullet_left;
+
+  uint8_t lurk_mode;
+  uint8_t res;
+  
 } cmd_game_event;
 
 /*-------------------REFEREE_BATTLEFIELD_CMD_SET---- 0x41 -------------*/

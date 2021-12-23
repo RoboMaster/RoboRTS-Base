@@ -177,7 +177,7 @@ bool Protocol::Take(const CommandInfo *command_info,
                                          command_info->cmd_id)]->Pop(container)) {
 //      DLOG_EVERY_N(ERROR, 100)<<"nothing to take";
       return false;
-    }
+    } 
 
 
     bool mismatch = false;
