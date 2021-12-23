@@ -73,6 +73,7 @@ class RefereeSystem: public Module {
   ros::Publisher ros_game_robot_hp_pub_;
   ros::Publisher ros_game_robot_bullet_pub_;
   ros::Publisher ros_game_zone_array_pub_;
+  ros::Publisher ros_game_lurk_status_pub_;
 
   ros::Publisher ros_robot_status_pub_;
   ros::Publisher ros_robot_heat_pub_;

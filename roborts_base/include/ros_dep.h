@@ -45,6 +45,6 @@
 #include "roborts_msgs/RobotHeat.h"
 #include "roborts_msgs/RobotDamage.h"
 #include "roborts_msgs/RobotShoot.h"
-
+#include "roborts_msgs/LurkStatus.h"
 
 #endif //ROBORTS_BASE_ROS_DEP_H
