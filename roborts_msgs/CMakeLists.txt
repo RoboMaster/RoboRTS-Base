@@ -37,6 +37,7 @@ add_message_files(
         RobotHeat.msg
         RobotDamage.msg
         RobotShoot.msg
+	LurkStatus.msg
 )
 
 # gimbal message
