@@ -28,6 +28,9 @@ Gimbal::~Gimbal(){
   if(heartbeat_thread_.joinable()){
     heartbeat_thread_.join();
   }
+  if(gimbal_angle_vel_daemon_thread_.joinable()){
+    gimbal_angle_vel_daemon_thread_.join();
+  }
 }
 
 void Gimbal::SDK_Init(){
@@ -38,15 +41,16 @@ void Gimbal::SDK_Init(){
   roborts_sdk::cmd_version_id version_cmd;
   version_cmd.version_id=0;
   auto version = std::make_shared<roborts_sdk::cmd_version_id>(version_cmd);
-  verison_client_->AsyncSendRequest(version,
-                                    [](roborts_sdk::Client<roborts_sdk::cmd_version_id,
-                                                           roborts_sdk::cmd_version_id>::SharedFuture future) {
-                                      ROS_INFO("Gimbal Firmware Version: %d.%d.%d.%d",
-                                               int(future.get()->version_id>>24&0xFF),
-                                               int(future.get()->version_id>>16&0xFF),
-                                               int(future.get()->version_id>>8&0xFF),
-                                               int(future.get()->version_id&0xFF));
-                                    });
+  verison_client_->AsyncSendRequest(
+    version,
+    [](roborts_sdk::Client<roborts_sdk::cmd_version_id, roborts_sdk::cmd_version_id>::SharedFuture future) {
+      ROS_INFO("Gimbal Firmware Version: %d.%d.%d.%d",
+        int(future.get()->version_id>>24&0xFF),
+        int(future.get()->version_id>>16&0xFF),
+        int(future.get()->version_id>>8&0xFF),
+        int(future.get()->version_id&0xFF));
+    }
+  );
 
   handle_->CreateSubscriber<roborts_sdk::cmd_gimbal_info>(GIMBAL_CMD_SET, CMD_PUSH_GIMBAL_INFO,
                                                           GIMBAL_ADDRESS, BROADCAST_ADDRESS,
@@ -61,21 +65,45 @@ void Gimbal::SDK_Init(){
 
   heartbeat_pub_ = handle_->CreatePublisher<roborts_sdk::cmd_heartbeat>(UNIVERSAL_CMD_SET, CMD_HEARTBEAT,
                                                                         MANIFOLD2_ADDRESS, GIMBAL_ADDRESS);
-  heartbeat_thread_ = std::thread([this]{
-                                    roborts_sdk::cmd_heartbeat heartbeat;
-                                    heartbeat.heartbeat=0;
-                                    while(ros::ok()){
-                                      heartbeat_pub_->Publish(heartbeat);
-                                      std::this_thread::sleep_for(std::chrono::milliseconds(300));
-                                    }
-                                  }
-  );
+  heartbeat_thread_ = std::thread([this] {
+    roborts_sdk::cmd_heartbeat heartbeat;
+    heartbeat.heartbeat = 0;
+    while(ros::ok()){
+      heartbeat_pub_->Publish(heartbeat);
+      std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    }
+  });
+
+  gimbal_angle_vel_daemon_thread_ = std::thread([this] {
+
+    const int ANGLE_VEL_FREQUENCY_HZ = 100;
+    double duration = ANGLE_VEL_FREQUENCY_HZ / 1000.0;
+
+    while(ros::ok()){
+      if (gimbal_angle_vel_pitch_ != 0 || gimbal_angle_vel_yaw_ != 0) {
+
+        roborts_sdk::cmd_gimbal_angle gimbal_angle;
+        gimbal_angle.ctrl.bit.yaw_mode = 1;    // related angle
+        gimbal_angle.ctrl.bit.pitch_mode = 1;  // related angle
+
+        gimbal_angle.yaw = double(gimbal_angle_vel_yaw_) * 1800 / M_PI * duration;
+        gimbal_angle.pitch = double(gimbal_angle_vel_pitch_) * 1800 / M_PI * duration;
+
+        gimbal_angle_pub_mutex_.lock();   // for thread safety
+        gimbal_angle_pub_->Publish(gimbal_angle);
+        gimbal_angle_pub_mutex_.unlock();
+      }
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(int(1.0 / duration)));
+    }
+  });
 }
 
 void Gimbal::ROS_Init(){
 
   //ros subscriber
   ros_sub_cmd_gimbal_angle_ = ros_nh_.subscribe("cmd_gimbal_angle", 1, &Gimbal::GimbalAngleCtrlCallback, this);
+  ros_sub_cmd_gimbal_vel_ = ros_nh_.subscribe("cmd_gimbal_vel", 1, &Gimbal::GimbalAngleVelCallback, this);
 
   //ros service
   ros_ctrl_fric_wheel_srv_ = ros_nh_.advertiseService("cmd_fric_wheel", &Gimbal::CtrlFricWheelService, this);
@@ -109,7 +137,25 @@ void Gimbal::GimbalAngleCtrlCallback(const roborts_msgs::GimbalAngle::ConstPtr &
   gimbal_angle.pitch = msg->pitch_angle*1800/M_PI;
   gimbal_angle.yaw = msg->yaw_angle*1800/M_PI;
 
+  gimbal_angle_pub_mutex_.lock();
   gimbal_angle_pub_->Publish(gimbal_angle);
+  gimbal_angle_pub_mutex_.unlock();
+
+}
+
+void Gimbal::GimbalAngleVelCallback(const roborts_msgs::GimbalAngle::ConstPtr &msg) {
+
+  if (msg->yaw_mode) {
+    gimbal_angle_vel_yaw_ = gimbal_angle_vel_yaw_ + msg->yaw_angle;
+  } else {
+    gimbal_angle_vel_yaw_ = msg->yaw_angle;
+  }
+
+  if (msg->pitch_mode) {
+    gimbal_angle_vel_pitch_ = gimbal_angle_vel_pitch_ + msg->pitch_angle;
+  } else {
+    gimbal_angle_vel_pitch_ = msg->pitch_angle;
+  }
 
 }
 
